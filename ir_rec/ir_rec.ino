@@ -14,9 +14,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #define BUZZER 4                                            
 #define IR_REC_FRONT 2
+
+#define THRESHOLD 250
 #define IR_DATA 3409182978 // Raw data based on received signal (IrReceiver.decodedIRData.decodedRawData)
 
 //bool is_shot = false;
+unsigned long current_time = 0;
 uint32_t raw_data = 0;
 
 void setup()  
@@ -28,20 +31,23 @@ void setup()
                                
 void loop()  
 {  
-  if (IrReceiver.decode()) {
-    Serial.println("Received something...");    
-    IrReceiver.printIRResultShort(&Serial); // Prints a summary of the received data
-    Serial.println();
-    raw_data = IrReceiver.decodedIRData.decodedRawData;
-    Serial.println(raw_data);
-    
-    // Register shots
-    if(raw_data == IR_DATA) {
-      playBuzzer();
-    }
-    IrReceiver.resume(); // Important, enables to receive the next IR signal
-  }  
-  delay(1); // wait for one-tenth of a second
+  // provide time for decoding of IR value
+  if(millis() - current_time > THRESHOLD) {
+    current_time = millis();
+    if (IrReceiver.decode()) {
+      Serial.println("Received something...");    
+      IrReceiver.printIRResultShort(&Serial); // Prints a summary of the received data
+      Serial.println();
+      raw_data = IrReceiver.decodedIRData.decodedRawData;
+      Serial.println(raw_data);
+      
+      // Register shots
+      if(raw_data == IR_DATA) {
+        playBuzzer();
+      }
+      IrReceiver.resume(); // Important, enables to receive the next IR signal
+    }  
+  }
 }  
 
 void playBuzzer() {
