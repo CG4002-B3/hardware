@@ -32,7 +32,6 @@ void setup() {
   Wire.write(0x00);                  // Make reset - place a 0 into the 6B register
   Wire.endTransmission(true);        //end the transmission
   
-//  calibrate_imu();
   delay(20);
 }
 
@@ -49,18 +48,18 @@ void loop() {
   Wire.requestFrom(MPU, 6, true); // Read 6 registers total, each axis value is stored in 2 registers
   
   //For a range of +-2g, we need to divide the raw values by 16384, according to the datasheet
-  AccX = ((Wire.read() << 8 | Wire.read()) / ACC_LSB_SENSITIVITY); // X-axis value
-  AccY = ((Wire.read() << 8 | Wire.read()) / ACC_LSB_SENSITIVITY); // Y-axis value
-  AccZ = ((Wire.read() << 8 | Wire.read()) / ACC_LSB_SENSITIVITY); // Z-axis value
+  AccX = (Wire.read() << 8 | Wire.read()); // X-axis value
+  AccY = (Wire.read() << 8 | Wire.read()); // Y-axis value
+  AccZ = (Wire.read() << 8 | Wire.read()); // Z-axis value
   
   // === Read gyroscope data === //
   Wire.beginTransmission(MPU);
   Wire.write(0x43); // Gyro data first register address 0x43
   Wire.endTransmission(false);
   Wire.requestFrom(MPU, 6, true); // Read 4 registers total, each axis value is stored in 2 registers
-  GyroX = ((Wire.read() << 8 | Wire.read()) / GYRO_LSB_SENSITIVITY); // For a 250deg/s range we have to divide first the raw value by 131.0, according to the datasheet
-  GyroY = ((Wire.read() << 8 | Wire.read()) / GYRO_LSB_SENSITIVITY);
-  GyroZ = ((Wire.read() << 8 | Wire.read()) / GYRO_LSB_SENSITIVITY);
+  GyroX = (Wire.read() << 8 | Wire.read()); // For a 250deg/s range we have to divide first the raw value by 131.0, according to the datasheet
+  GyroY = (Wire.read() << 8 | Wire.read());
+  GyroZ = (Wire.read() << 8 | Wire.read());
   
   // Correct the outputs with the calculated error values as obtained from calibrate_imu
   AccX -= AccErrorX;
@@ -69,6 +68,15 @@ void loop() {
   GyroX -= GyroErrorX;
   GyroY -= GyroErrorY;
   GyroZ -= GyroErrorZ;
+
+  // Dicide by respective values
+  AccX /= ACC_LSB_SENSITIVITY;
+  AccY /= ACC_LSB_SENSITIVITY;
+  AccZ /= ACC_LSB_SENSITIVITY;
+  GyroX /= GYRO_LSB_SENSITIVITY;
+  GyroY /= GYRO_LSB_SENSITIVITY;
+  GyroZ /= GYRO_LSB_SENSITIVITY;
+  
   
   // Print the values on the serial monitor
   Serial.print(AccX);
@@ -97,17 +105,17 @@ void calibrate_imu() {
     Wire.write(0x3B);
     Wire.endTransmission(false);
     Wire.requestFrom(MPU, 6, true);
-    AccErrorX += ((Wire.read() << 8 | Wire.read()) / ACC_LSB_SENSITIVITY);
-    AccErrorY += ((Wire.read() << 8 | Wire.read()) / ACC_LSB_SENSITIVITY);
-    AccErrorZ += ((Wire.read() << 8 | Wire.read()) / ACC_LSB_SENSITIVITY);
+    AccErrorX += (Wire.read() << 8 | Wire.read());
+    AccErrorY += (Wire.read() << 8 | Wire.read());
+    AccErrorZ += (Wire.read() << 8 | Wire.read());
 
     Wire.beginTransmission(MPU);
     Wire.write(0x43);
     Wire.endTransmission(false);
     Wire.requestFrom(MPU, 6, true);
-    GyroErrorX += ((Wire.read() << 8 | Wire.read()) / GYRO_LSB_SENSITIVITY);
-    GyroErrorY += ((Wire.read() << 8 | Wire.read()) / GYRO_LSB_SENSITIVITY);
-    GyroErrorZ += ((Wire.read() << 8 | Wire.read()) / GYRO_LSB_SENSITIVITY);
+    GyroErrorX += (Wire.read() << 8 | Wire.read());
+    GyroErrorY += (Wire.read() << 8 | Wire.read());
+    GyroErrorZ += (Wire.read() << 8 | Wire.read());
 
     if(counter == THROWAWAY - 1) {
       counter = 0;
@@ -122,17 +130,17 @@ void calibrate_imu() {
     Wire.write(0x3B);
     Wire.endTransmission(false);
     Wire.requestFrom(MPU, 6, true);
-    AccErrorX += ((Wire.read() << 8 | Wire.read()) / ACC_LSB_SENSITIVITY);
-    AccErrorY += ((Wire.read() << 8 | Wire.read()) / ACC_LSB_SENSITIVITY);
-    AccErrorZ += ((Wire.read() << 8 | Wire.read()) / ACC_LSB_SENSITIVITY);
+    AccErrorX += (Wire.read() << 8 | Wire.read());
+    AccErrorY += (Wire.read() << 8 | Wire.read());
+    AccErrorZ += (Wire.read() << 8 | Wire.read());
 
     Wire.beginTransmission(MPU);
     Wire.write(0x43);
     Wire.endTransmission(false);
     Wire.requestFrom(MPU, 6, true);
-    GyroErrorX += ((Wire.read() << 8 | Wire.read()) / GYRO_LSB_SENSITIVITY);
-    GyroErrorY += ((Wire.read() << 8 | Wire.read()) / GYRO_LSB_SENSITIVITY);
-    GyroErrorZ += ((Wire.read() << 8 | Wire.read()) / GYRO_LSB_SENSITIVITY);
+    GyroErrorX += (Wire.read() << 8 | Wire.read());
+    GyroErrorY += (Wire.read() << 8 | Wire.read());
+    GyroErrorZ += (Wire.read() << 8 | Wire.read());
     
     counter++;
   }
