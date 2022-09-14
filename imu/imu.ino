@@ -14,7 +14,12 @@
 
 #define BUZZER 4
 
-#define THRESHOLD 200
+//40Hz
+#define THRESHOLD 25
+// 50Hz
+//#define THRESHOLD 20
+// 60Hz
+//#define THRESHOLD 17
 
 bool has_thrown = false;
 bool has_calibrate = false;
@@ -94,7 +99,7 @@ void loop() {
   GyroY_avg += GyroY;
   GyroZ_avg += GyroZ;
 
-  // THRESHOLD is 200ms = 50Hz. Sampling at 50Hz
+  // THRESHOLD is 25ms = 40Hz. Sampling at 40Hz
   if(millis() - current_time > THRESHOLD) {
     current_time = millis();
     AccX_avg /= reading_number;
