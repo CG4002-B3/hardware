@@ -4,7 +4,7 @@
 #define GUN_TRIGGER 2
 #define IR_EMIT 4
 #define BUZZER 5
-#define THRESHOLD 250 // the debounce time; increase if the output flickers
+#define THRESHOLD 250 // the debounce time;
 
 
 // GUN TRIGGER STATES
