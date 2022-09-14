@@ -14,14 +14,20 @@
 
 #define BUZZER 4
 
+#define THRESHOLD 200
+
 bool has_thrown = false;
 bool has_calibrate = false;
 
 const int MPU = 0x68; // MPU6050 I2C address
 float AccX, AccY, AccZ;
 float GyroX, GyroY, GyroZ;
+float AccX_avg, AccY_avg, AccZ_avg;
+float GyroX_avg, GyroY_avg, GyroZ_avg;
 float AccErrorX, AccErrorY, AccErrorZ, GyroErrorX, GyroErrorY, GyroErrorZ;
 int counter = 0;
+int reading_number = 0;
+unsigned long current_time = 0;
 
 void setup() {
   pinMode(BUZZER, OUTPUT);
@@ -57,9 +63,13 @@ void loop() {
   Wire.write(0x43); // Gyro data first register address 0x43
   Wire.endTransmission(false);
   Wire.requestFrom(MPU, 6, true); // Read 4 registers total, each axis value is stored in 2 registers
-  GyroX = (Wire.read() << 8 | Wire.read()); // For a 250deg/s range we have to divide first the raw value by 131.0, according to the datasheet
+
+  // For a 250deg/s range we have to divide first the raw value by 131.0, according to the datasheet
+  GyroX = (Wire.read() << 8 | Wire.read());
   GyroY = (Wire.read() << 8 | Wire.read());
   GyroZ = (Wire.read() << 8 | Wire.read());
+
+  reading_number++;
   
   // Correct the outputs with the calculated error values as obtained from calibrate_imu
   AccX -= AccErrorX;
@@ -69,29 +79,43 @@ void loop() {
   GyroY -= GyroErrorY;
   GyroZ -= GyroErrorZ;
 
-  // Dicide by respective values
+  // Divide by respective values
   AccX /= ACC_LSB_SENSITIVITY;
   AccY /= ACC_LSB_SENSITIVITY;
   AccZ /= ACC_LSB_SENSITIVITY;
   GyroX /= GYRO_LSB_SENSITIVITY;
   GyroY /= GYRO_LSB_SENSITIVITY;
   GyroZ /= GYRO_LSB_SENSITIVITY;
-  
-  
-  // Print the values on the serial monitor
-  Serial.print(AccX);
-  Serial.print("/");
-  Serial.print(AccY);
-  Serial.print("/");
-  Serial.println(AccZ);
-  
-  Serial.print(GyroX);
-  Serial.print("/");
-  Serial.print(GyroY);
-  Serial.print("/");
-  Serial.println(GyroZ);
-  Serial.println("");
-  delay(30);
+
+  AccX_avg += AccX;
+  AccY_avg += AccY;
+  AccZ_avg += AccZ;
+  GyroX_avg += GyroX;
+  GyroY_avg += GyroY;
+  GyroZ_avg += GyroZ;
+
+  // THRESHOLD is 200ms = 50Hz. Sampling at 50Hz
+  if(millis() - current_time > THRESHOLD) {
+    current_time = millis();
+    AccX_avg /= reading_number;
+    AccY_avg /= reading_number;
+    AccZ_avg /= reading_number;
+    GyroX_avg /= reading_number;
+    GyroY_avg /= reading_number;
+    GyroZ_avg /= reading_number;
+    Serial.print(AccX_avg);
+    Serial.print(" / ");
+    Serial.print(AccY_avg);
+    Serial.print(" / ");
+    Serial.println(AccZ_avg);
+    Serial.print(GyroX_avg);
+    Serial.print(" / ");
+    Serial.print(GyroY_avg);
+    Serial.print(" / ");
+    Serial.println(GyroZ_avg);
+    Serial.println();
+    reading_number = 0;
+  }
 }
 
 void calibrate_imu() {
@@ -166,8 +190,6 @@ void calibrate_imu() {
   Serial.println(GyroErrorY);
   Serial.print("GyroErrorZ: ");
   Serial.println(GyroErrorZ);
-
-  delay(2); // To prevent repeated measurements
 
   // PLAY VIBRATION FEEDBACK ON BUZZER WHEN CALIBRATION IS COMPLETE
   play_buzzer();
