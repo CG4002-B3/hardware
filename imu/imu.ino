@@ -15,7 +15,7 @@
 #define BUZZER 4
 
 //40Hz
-#define THRESHOLD 25
+#define THRESHOLD 250
 // 50Hz
 //#define THRESHOLD 20
 // 60Hz
