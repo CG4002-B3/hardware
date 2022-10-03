@@ -12,7 +12,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #include <IRremote.h> // >v3.0.0
 
-#define BUZZER 4                                            
+#define BUZZER 4
+#define ORANGE_LED 3                                            
 #define IR_REC_FRONT 2
 
 #define THRESHOLD 250
@@ -26,6 +27,7 @@ void setup()
 { 
   Serial.begin(9600); //initialize serial connection to print on the Serial Monitor of the Arduino IDE
   pinMode(BUZZER, OUTPUT);
+  pinMode(ORANGE_LED, OUTPUT);
   IrReceiver.begin(IR_REC_FRONT); // Initializes the IR receiver object
 }  
                                
@@ -43,16 +45,18 @@ void loop()
       
       // Register shots
       if(raw_data == IR_DATA) {
-        playBuzzer();
+        playFeedback();
       }
       IrReceiver.resume(); // Important, enables to receive the next IR signal
     }  
   }
 }  
 
-void playBuzzer() {
+void playFeedback() {
   digitalWrite(BUZZER, HIGH);
+  digitalWrite(ORANGE_LED, HIGH);
   delay(300);
   digitalWrite(BUZZER, LOW);
+  digitalWrite(ORANGE_LED, LOW);
   delay(100);
 }
