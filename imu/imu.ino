@@ -13,6 +13,7 @@
 #define THROWAWAY 100
 
 #define BUZZER 4
+#define YELLOW_LED 5
 
 //40Hz
 #define THRESHOLD 250
@@ -36,6 +37,7 @@ unsigned long current_time = 0;
 
 void setup() {
   pinMode(BUZZER, OUTPUT);
+  pinMode(YELLOW_LED, OUTPUT);
   Serial.begin(19200);
   Wire.begin();                      // Initialize comunication
   Wire.beginTransmission(MPU);       // Start communication with MPU6050 // MPU=0x68
@@ -128,7 +130,9 @@ void calibrate_imu() {
   // Note that we should place the IMU flat in order to get the proper values, so that we then can the correct values
   // Read values 1000 times
   // Throw away the first 100 values as they tend to be the most inaccurate
-
+  play_feedback();
+  delay(1000);
+  
   while(counter < THROWAWAY && has_thrown == false) {
     Wire.beginTransmission(MPU);
     Wire.write(0x3B);
@@ -196,22 +200,28 @@ void calibrate_imu() {
   Serial.print("GyroErrorZ: ");
   Serial.println(GyroErrorZ);
 
-  // PLAY VIBRATION FEEDBACK ON BUZZER WHEN CALIBRATION IS COMPLETE
-  play_buzzer();
+  // PLAY VIBRATION & LED FEEDBACK ON BUZZER WHEN CALIBRATION IS COMPLETE
+  play_feedback();
 }
 
 
-void play_buzzer() {
+void play_feedback() {
  digitalWrite(BUZZER, HIGH);
+ digitalWrite(YELLOW_LED, HIGH);
  delay(100);
  digitalWrite(BUZZER, LOW);
+ digitalWrite(YELLOW_LED, LOW);
  delay(150);
  digitalWrite(BUZZER, HIGH);
+ digitalWrite(YELLOW_LED, HIGH);
  delay(100);
  digitalWrite(BUZZER, LOW);
+ digitalWrite(YELLOW_LED, LOW);
  delay(200);
  digitalWrite(BUZZER, HIGH);
+ digitalWrite(YELLOW_LED, HIGH);
  delay(400);
  digitalWrite(BUZZER, LOW);
+ digitalWrite(YELLOW_LED, LOW);
  delay(100);
 }
