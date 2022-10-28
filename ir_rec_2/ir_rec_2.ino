@@ -17,7 +17,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #define IR_REC_FRONT 2
 
 #define THRESHOLD 250
-#define IR_DATA 3409182978 // Raw data based on received signal (IrReceiver.decodedIRData.decodedRawData)
+#define IR_DATA 3910533378 // Raw data based on received signal (IrReceiver.decodedIRData.decodedRawData) Address 0x0102 command 0x16
 
 //bool is_shot = false;
 unsigned long current_time = 0;
